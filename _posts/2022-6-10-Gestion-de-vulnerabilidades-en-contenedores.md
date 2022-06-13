@@ -13,13 +13,14 @@ Este articulo pretende ofrecer un enfoque de gobierno que permita:
 ## Introduccion
 
 Durante el 1er semestre de este año, Gartner publico un documento donde menciona que el 70% de las compañías va estar utilizando alguna tecnología de aplicaciones en contenedores para 2023.
-Adicionalmente a esto, durante el año pasado la Cloud-Native Computing Foundation (CNCF) realizo una encuesta llegando a mas de 3800 desarrolladores para conocer que tecnologías utilizaban para el desarrollo de sus backend. Los resultados llegan a la conclusión de que Kubernetes y su consecuente aplicación de aplicaciones en contenedores ya cruzo el umbral de adopción transformándose en una tecnología globalmente conveniente para disponibilidad servicios internos o externos.
+Adicionalmente a esto, durante el año pasado la Cloud-Native Computing Foundation (CNCF) realizo una encuesta llegando a mas de 3800 desarrolladores para conocer que tecnologías utilizaban para el desarrollo de sus productos. Los resultados llegan a la conclusión de que Kubernetes y su despliegue de aplicaciones en contenedores ya cruzo el umbral de adopción, transformándose en una tecnología globalmente conveniente para disponibilidad servicios internos/externos.
 
 ## Contexto y desafios
 
-La tecnologia de contenedores permite abstraer el sistema operativo del código, lo que conlleva a desplegar servicios de manera mas rápida y en lenguaje que el desarrollador prefiera. 
-Distintos usos de lenguaje generan ademas, distintos usos de librerías para agregar funcionalidad.
-En compañías de medio a gran tamaño, la cantidad de microservicios desplegados puede ascender a cientos o miles, generando la aparición de una misma vulnerabilidad en multiples elementos debido a la reutilizaron no controlada de dependencias transitivas.
+* La tecnologia de contenedores permite abstraer el sistema operativo del código, lo que conlleva a desplegar servicios de manera mas rápida y en un lenguaje que el desarrollador prefiera. 
+* Distintos usos de lenguaje generan ademas, distintos usos de librerías para agregar funcionalidad.
+* En compañías de medio a gran tamaño, la cantidad de microservicios desplegados puede ascender a cientos o miles, generando la aparición de una misma vulnerabilidad en multiples aplicaciones, debido a la reutilizaron no controlada de dependencias transitivas.
+* Una vez implementada la solucion para descubrir vulnerabilidades, se genera friccion con los desarrolladores. No esta claro que tienen que actualizar y cual es la mejor manera de hacerlo, haciendo que gestionar el ownership para disminuir el nivel de riesgo sea verdaderamente dificil. 
 
 En una etapa inicial es muy común que el desarrollador seleccione una imagen base que satisfaga el software que precisa para ejecutar su aplicación, ya sea seleccionado un sistema operativo (ubuntu/debian/centos) e instalando sus paquetes necesarios o directamente, utilizar una imagen con el lenguaje importado (ruby / openjdk / golang).
 
@@ -31,16 +32,16 @@ En el mejor de los casos, una imagen puede tener elementos que son ajenos a la a
 
 Generalmente se deja toda la generación de imagenes en manos de los desarrolladores o equipo DevOps ya que se asume, son ellos los que saben que se debe incluir para que su sistema funcione. 
 
-Cuando los desarrolladores reciben el reporte de vulnerabilidades no tienen idea por donde empezar. Se encuentran con paquetes que ellos no incluyen en su código ni en la configuración de su imagen, pero que vienen heredados de aquellas superiores (OpenJKD > Debian > Scratch > tar.gz) las cuales a su vez, instalan paquetes adicionales generando dependencias transitivas. 
+Muchos de los desarrolladores reciben el reporte de vulnerabilidades pero no tienen mucha nocion de por donde empezar. Se encuentran con paquetes que ellos no incluyen en su código ni en la configuración de su imagen, pero que vienen heredados de aquellas superiores (OpenJKD > Debian > Scratch > tar.gz) las cuales a su vez, instalan paquetes adicionales generando dependencias transitivas. 
 
-Esto genera nuestro primer problema: Como arreglamos vulnerabilidades fuera de nuestro alcance?
+Esto genera nuestro primer problema: **Como arreglamos vulnerabilidades fuera de nuestro alcance?**
 
 En un ambiente podemos tener cientos o miles de contenedores ejecutando servicios, las cuales pueden utilizar librerías en común, pero que fueron creadas desde imagen distintas. 
-Esto da lugar a nuestro segundo inconveniente: cómo podemos disminuir la cantidad de veces que se debe parchear una misma vulnerabilidad?
+Esto da lugar a nuestro segundo inconveniente: **Cómo podemos disminuir la cantidad de veces que se debe parchear una misma vulnerabilidad?**
 
-Otro inconveniente recurrent es la falta de estandarización: como podemos asegurar que nuestros contenedores tienen los elementos necesarios básicos para cumplir con nuestras políticas de seguridad?
+Otro inconveniente recurrent es la falta de estandarización: **como podemos asegurar que nuestros contenedores tienen los elementos necesarios básicos para cumplir con nuestras políticas de seguridad?**
 
-Para abordar estas preguntas lo que proponemos es una modelo de gobierno de generación y consumo de imagenes de para contenedores gestionado por al menos 3 capas que aprovecha el uso de la generación multi stage para heredar funcionalidad.
+Para abordar estas preguntas lo que proponemos es una modelo de gobierno de generación y consumo de imagenes de para contenedores gestionado por al menos _3 capas_ que aprovecha el uso de la generación multi stage para heredar funcionalidad.
 
 **La imagen baseline**
 Esta imagen va contener el sistema operativo BASE sobre el cual se crearan las adicionales. En esta etapa seleccionamos la que satisface nuestro apetito de riesgo. 
